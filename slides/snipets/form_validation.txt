@@ -1,0 +1,10 @@
+<EditForm Model="@todo" OnValidSubmit="AddTodo">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-inline">
+        <div class="form-group">
+            <input type="text" class="form-input" id="name" @bind="todo.Title"  />
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+    </div>
+</EditForm>

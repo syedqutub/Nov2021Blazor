@@ -1,0 +1,19 @@
+
+[ApiController]
+[Route("[controller]")]
+public class TodoController : ControllerBase
+{
+    public static List<Todo> todos = new List<Todo>();
+
+    [HttpGet]
+    public List<Todo> Get()
+        => todos;
+
+    [HttpPost]
+    public Todo Post([FromBody]Todo todo)
+    {
+        todo.Id = Environment.TickCount;
+        todos.Add(todo);
+        return todo;
+    }
+}

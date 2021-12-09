@@ -1,0 +1,78 @@
+﻿@page "/voting"
+@inject Supabase.Client db;
+
+<PageTitle>Voting forecast</PageTitle>
+
+<h1>Voting</h1>
+@if(votes == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+
+<h3>Should we have a full training course? Yes:@yesCount , No: @noCount</h3>
+
+<p>This is a basic voting example.</p>
+@if (!isVoted)
+{
+<EditForm Model="@vote" OnInvalidSubmit="(x)=> responseExists = true == votes?.Any(v=>v.Email == vote.Email)" OnValidSubmit="@Submit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    @if (responseExists)
+    {
+        <ul>
+            <li>Response for @vote.Email already exists.</li>
+        </ul>
+    }
+
+    <div class="form">
+        <div class="form-group">
+            <input @bind="@vote.Name" type="text" class="form-input" placeholder="Enter your name">
+        </div>
+        <div class="form-group">
+            <input @bind="@vote.Email" type="email" class="form-input" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+            <input @bind="@vote.Answer" type="checkbox"> <span>Let's have a full training</span>
+        </div>
+        <div class="form-group">
+            <button disabled="@isSubmiting" class="btn btn-primary" type="submit">Submit</button>
+        </div>
+    </div>
+</EditForm>    
+}
+else{
+    <p> Thanks for submiting your vote. @vote.Name !</p>
+}
+}
+@code {
+    private Vote vote = new();
+    private List<Vote>? votes;
+    private bool isVoted = false;
+    private bool isSubmiting = false;
+    private int yesCount = 0;
+    private int noCount = 0;
+    private bool responseExists = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        votes = (await db.From<Vote>().Get()).Models;
+        yesCount = votes.Where(x=>x.Answer).Count();
+        noCount = votes.Where(x=>!x.Answer).Count();
+    }
+
+    async Task Submit()
+    {
+        if(votes?.Any(x=>x.Email == vote.Email) == true)
+        {
+            responseExists = true;
+            return;
+        }
+
+        isSubmiting = true;
+        await db.From<Vote>().Insert(vote);
+        isSubmiting = false;
+        isVoted = true;
+    }
+}

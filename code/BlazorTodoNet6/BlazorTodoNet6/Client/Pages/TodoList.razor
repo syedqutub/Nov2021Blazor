@@ -1,0 +1,80 @@
+﻿@page "/todo-list"
+@using BlazorTodoNet6.Shared
+@inject HttpClient Http
+
+<PageTitle>Todo List</PageTitle>
+
+<h1>Todo List</h1>
+
+<h3>All Todos: @todos.Count</h3>
+
+<form action="javascript:void(0)">
+    <div class="form-inline">
+        <input @bind:event="oninput" @bind="@search" type="text" name="search" placeholder="Enter search term" >
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </div>
+</form>
+
+<EditForm Model="@todo" OnValidSubmit="AddTodo">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-inline">
+        <div class="form-group">
+            <input type="text" class="form-input" id="name" @bind="todo.Title"  />
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+    </div>
+</EditForm>
+
+<h3>Completed</h3>
+
+<ul>
+    @foreach(var t in GetFilteredTodos(true))
+    {
+        <li>
+            <input type="checkbox" @bind="t.IsCompleted" />
+            @t.Title
+        </li>
+
+    }
+</ul>
+
+<h3>In Complete</h3>
+<ul>
+    @foreach(var t in GetFilteredTodos(false))
+    {
+        <li>
+            <input type="checkbox" @bind="t.IsCompleted" />
+            @t.Title
+        </li>
+    }
+</ul>
+
+@code {
+    private List<Todo> todos = new List<Todo>();
+    private string? search;
+    private Todo todo = new();
+
+    public IEnumerable<Todo> GetFilteredTodos(
+        bool isCompleted = false){
+        return (from x in todos
+                where x.IsCompleted == isCompleted
+                && (string.IsNullOrEmpty(search) 
+                || x.Title?.Contains(search,StringComparison.InvariantCultureIgnoreCase) == true)
+                select x
+        );
+    }
+
+    async Task AddTodo()
+    {
+        await Http.PostAsJsonAsync("Todo", todo);
+        todos.Add(todo);
+        todo = new();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        todos = await Http.GetFromJsonAsync<List<Todo>>("Todo");
+    }
+}

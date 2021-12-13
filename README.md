@@ -11,6 +11,8 @@
 
 2. [Github Pages Blazor](https://syedqutub.github.io/blazor/ "Github Pages Blazor")
 
+3. [Blazor Server App Heroku]("https://blazorhosted.herokuapp.com/")
+
 # Runing The Sample Code
 1. Clone the Repo
 2. Open the project in the code directory.
